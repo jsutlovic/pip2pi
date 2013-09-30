@@ -91,8 +91,7 @@ def dir2pi(argv=sys.argv):
 
     shutil.rmtree(pkgdirpath("simple"), ignore_errors=True)
     os.mkdir(pkgdirpath("simple"))
-    pkg_index = ("<html><head><title>Simple Index</title>"
-                 "<meta name='api-version' value='2' /></head><body>\n")
+    pkg_names = []
 
     for file in os.listdir(pkgdir):
         pkg_filepath = os.path.join(pkgdir, file)
@@ -109,14 +108,21 @@ def dir2pi(argv=sys.argv):
         symlink_target = os.path.join(pkg_dir, pkg_new_basename)
         symlink_source = os.path.join("../../", pkg_basename)
         os.symlink(symlink_source, symlink_target)
-        pkg_name_html = cgi.escape(pkg_name)
-        pkg_index += "<a href='{0}/'>{0}</a><br />\n".format(pkg_name_html)
+        pkg_names.append(pkg_name)
         with open(os.path.join(pkg_dir, "index.html"), "a") as fp:
             pkg_new_basename_html = cgi.escape(pkg_new_basename)
             fp.write("<a href='%s'>%s</a><br />\n"
                      %(pkg_new_basename_html, pkg_new_basename_html))
-    pkg_index += "</body></html>\n"
+
     with open(pkgdirpath("simple/index.html"), "w") as fp:
+        pkg_index = ("<html><head><title>Simple Index</title>"
+                     "<meta name='api-version' value='2' /></head><body>\n")
+        # Unique package names only
+        for pkg_name in sorted(set(pkg_names)):
+            pkg_name_html = cgi.escape(pkg_name)
+            pkg_index += "<a href='{0}/'>{0}</a><br />\n".format(pkg_name_html)
+        pkg_index += "</body></html>\n"
+
         fp.write(pkg_index)
     return 0
 
